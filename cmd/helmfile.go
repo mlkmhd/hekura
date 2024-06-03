@@ -22,7 +22,7 @@ var rootCmd = &cobra.Command{
 			currentDir, _ := os.Getwd()
 			os.Chdir(dirName)
 
-			command := exec.Command("helmfile", "template")
+			command := exec.Command("helmfile", "template", "-q")
 
 			// Capture output
 			output, err := command.CombinedOutput()
@@ -50,6 +50,12 @@ var rootCmd = &cobra.Command{
 			// Print output
 			fmt.Println(string(output))
 			os.Chdir(currentDir)
+		}
+
+		if _, err := os.Stat(dirName + "/raw-manifests"); os.IsNotExist(err) {
+			fmt.Println("the kustomize patch files could not be found")
+		} else {
+			fmt.Println("There're some raw manifests")
 		}
 	},
 }
