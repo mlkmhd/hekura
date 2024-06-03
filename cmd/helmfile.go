@@ -14,6 +14,7 @@ var rootCmd = &cobra.Command{
 	Long:  `A longer description that spans multiple lines and likely contains examples and usage of using your application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		helmfileDir := "helmfile"
+		kustomizeDir := "kustomize"
 
 		if _, err := os.Stat(helmfileDir); os.IsNotExist(err) {
 			fmt.Println("the helmfile.yaml not found!")
@@ -22,6 +23,21 @@ var rootCmd = &cobra.Command{
 
 			// Capture output
 			output, err := command.CombinedOutput()
+			if err != nil {
+				fmt.Println("Error executing command:", err)
+				os.Exit(1)
+			}
+
+			// Print output
+			fmt.Println(string(output))
+		}
+
+		if _, err := os.Stat(kustomizeDir); os.IsNotExist(err) {
+			fmt.Println("the kustomize patch files could not be found")
+		} else {
+			command := exec.Command("kustomize", "build", ".")
+			output, err := command.CombinedOutput()
+
 			if err != nil {
 				fmt.Println("Error executing command:", err)
 				os.Exit(1)
