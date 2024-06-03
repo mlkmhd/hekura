@@ -5,7 +5,5 @@ import (
 )
 
 func main() {
-	var dir string
-	
 	cmd.Execute()
 }

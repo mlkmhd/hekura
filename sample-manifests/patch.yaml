@@ -2,4 +2,4 @@ $patch: delete
 apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
 metadata:
-  name: envoy-proxy-rabbitmq
+  name: nginx-proxy-envoy

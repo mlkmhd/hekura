@@ -13,13 +13,16 @@ var rootCmd = &cobra.Command{
 	Short: "A brief description of your application",
 	Long:  `A longer description that spans multiple lines and likely contains examples and usage of using your application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		helmfileDir := "helmfile"
-		kustomizeDir := "kustomize"
+		dirName, _ := cmd.Flags().GetString("dir")
+		fmt.Println("checking the " + dirName + " directory")
 
-		if _, err := os.Stat(helmfileDir); os.IsNotExist(err) {
+		if _, err := os.Stat(dirName + "/helmfile.yaml"); os.IsNotExist(err) {
 			fmt.Println("the helmfile.yaml not found!")
 		} else {
-			command := exec.Command("helmfile", "template", "-f", "helmfile/helmfile.yaml")
+			currentDir, _ := os.Getwd()
+			os.Chdir(dirName)
+
+			command := exec.Command("helmfile", "template")
 
 			// Capture output
 			output, err := command.CombinedOutput()
@@ -27,14 +30,15 @@ var rootCmd = &cobra.Command{
 				fmt.Println("Error executing command:", err)
 				os.Exit(1)
 			}
-
-			// Print output
-			fmt.Println(string(output))
+			writeToFile("resources.yaml", string(output))
+			os.Chdir(currentDir)
 		}
 
-		if _, err := os.Stat(kustomizeDir); os.IsNotExist(err) {
+		if _, err := os.Stat(dirName + "/kustomization.yaml"); os.IsNotExist(err) {
 			fmt.Println("the kustomize patch files could not be found")
 		} else {
+			currentDir, _ := os.Getwd()
+			os.Chdir(dirName)
 			command := exec.Command("kustomize", "build", ".")
 			output, err := command.CombinedOutput()
 
@@ -45,11 +49,28 @@ var rootCmd = &cobra.Command{
 
 			// Print output
 			fmt.Println(string(output))
+			os.Chdir(currentDir)
 		}
 	},
 }
 
+func writeToFile(fileName string, content string) {
+	file, err := os.Create(fileName)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	defer file.Close()
+
+	_, err = file.WriteString(content)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+}
+
 func Execute() {
+	rootCmd.Flags().String("dir", "sample-manifests", "the directory for manifests")
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
