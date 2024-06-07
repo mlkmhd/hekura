@@ -1,0 +1,8 @@
+helmfile: 
+  - sample-manifests/helmfile.yaml
+
+kustomize:
+  - sample-manifests/kustomization.yaml
+
+raw-manifests:
+  - sample-manifests/raw-manifests
