@@ -1,8 +1,8 @@
 package pkg
 
 import (
-	"io/ioutil"
 	"log"
+	"os"
 
 	"gopkg.in/yaml.v2"
 )
@@ -10,11 +10,11 @@ import (
 type Config struct {
 	Helmfile    []string `yaml:"helmfile"`
 	Kustomize   []string `yaml:"kustomize"`
-	RawManifest []string `yaml:"raw-manifest"`
+	RawManifest []string `yaml:"raw-manifests"`
 }
 
 func LoadConfig(configFileName string) Config {
-	yamlFile, err := ioutil.ReadFile(configFileName)
+	yamlFile, err := os.ReadFile(configFileName)
 	if err != nil {
 		log.Fatalf("Error reading YAML file: %v; %v", configFileName, err)
 	}

@@ -2,7 +2,6 @@ package pkg
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 )
@@ -31,8 +30,8 @@ func Build(config Config) {
 			fmt.Println("the kustomize patch files could not be found")
 		} else {
 			os.Chdir(element)
-			content, err := ioutil.ReadFile("/tmp/resources.yaml")
-			err = ioutil.WriteFile("resources.yaml", content, 0644)
+			content, err := os.ReadFile("/tmp/resources.yaml")
+			err = os.WriteFile("resources.yaml", content, 0644)
 			command := exec.Command("kustomize", "build", ".")
 			output, err := command.CombinedOutput()
 			os.Remove("resources.yaml")
@@ -47,11 +46,17 @@ func Build(config Config) {
 		}
 	}
 
+	resourcesContent, _ := os.ReadFile("/tmp/resources-patched.yaml")
 	for _, element := range config.RawManifest {
-		if _, err := os.Stat(element); os.IsNotExist(err) {
-			fmt.Println("the kustomize patch files could not be found")
-		} else {
-			fmt.Println("There're some raw manifests")
+		dirEntries, _ := os.ReadDir(element)
+		for _, entry := range dirEntries {
+			if !entry.IsDir() {
+				manifestFileContent, _ := os.ReadFile(element + "/" + entry.Name())
+				resourcesContent = append(resourcesContent, []byte("\n---\n")...)
+				resourcesContent = append(resourcesContent, manifestFileContent...)
+			}
 		}
 	}
+
+	WriteToFile("/tmp/resources-final.yaml", string(resourcesContent))
 }
