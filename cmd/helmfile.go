@@ -17,9 +17,19 @@ func Execute() {
 		Long:  globalUsage,
 		Run: func(cmd *cobra.Command, args []string) {
 			configFileName, _ := cmd.Flags().GetString("config-file")
-			pkg.Execute(pkg.LoadConfig(configFileName))
+			pkg.Build(pkg.LoadConfig(configFileName))
 		},
 	}
+
+	var templateCmd = &cobra.Command{
+		Use:   "template",
+		Short: "Print template",
+		Long:  "Prints template",
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println("Printing template")
+		},
+	}
+	rootCmd.AddCommand(templateCmd)
 
 	rootCmd.Flags().String("config-file", "hekura.yaml", "the config file")
 
