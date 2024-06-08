@@ -6,7 +6,7 @@ import (
 	"os/exec"
 )
 
-func Build(config Config) {
+func Build(config *Config) string {
 
 	rootDir, _ := os.Getwd()
 
@@ -58,5 +58,8 @@ func Build(config Config) {
 		}
 	}
 
-	WriteToFile("/tmp/resources.yaml", string(resourcesContent))
+	result := string(resourcesContent)
+
+	WriteToFile("/tmp/resources.yaml", result)
+	return result
 }
