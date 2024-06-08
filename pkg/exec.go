@@ -30,23 +30,23 @@ func Build(config Config) {
 			fmt.Println("the kustomize patch files could not be found")
 		} else {
 			os.Chdir(element)
-			content, err := os.ReadFile("/tmp/resources.yaml")
-			err = os.WriteFile("resources.yaml", content, 0644)
+			content, _ := os.ReadFile("/tmp/resources.yaml")
+			WriteToFile("resources.yaml", string(content))
 			command := exec.Command("kustomize", "build", ".")
 			output, err := command.CombinedOutput()
-			os.Remove("resources.yaml")
 
 			if err != nil {
 				fmt.Println("Error executing command:", err)
 				os.Exit(1)
 			}
 
-			WriteToFile("/tmp/resources-patched.yaml", string(output))
+			WriteToFile("/tmp/resources.yaml", string(output))
+			os.Remove("resources.yaml")
 			os.Chdir(rootDir)
 		}
 	}
 
-	resourcesContent, _ := os.ReadFile("/tmp/resources-patched.yaml")
+	resourcesContent, _ := os.ReadFile("/tmp/resources.yaml")
 	for _, element := range config.RawManifest {
 		dirEntries, _ := os.ReadDir(element)
 		for _, entry := range dirEntries {
@@ -58,5 +58,5 @@ func Build(config Config) {
 		}
 	}
 
-	WriteToFile("/tmp/resources-final.yaml", string(resourcesContent))
+	WriteToFile("/tmp/resources.yaml", string(resourcesContent))
 }
