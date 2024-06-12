@@ -1,14 +1,11 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/mlkmhd/hekura/pkg"
 	"github.com/spf13/cobra"
 )
 
-func NewTemplateCmd() *cobra.Command {
+func NewDiffCmd() *cobra.Command {
 	config := pkg.Config{}
 	var configFileName string
 	var cmd = &cobra.Command{
@@ -17,8 +14,8 @@ func NewTemplateCmd() *cobra.Command {
 		Long:  "Prints template",
 		Run: func(cmd *cobra.Command, args []string) {
 			pkg.LoadConfig(configFileName, &config)
-			builtResourceFile, _ := os.ReadFile(pkg.Build(&config))
-			fmt.Println(string(builtResourceFile))
+			builtResourceFile := pkg.Build(&config)
+			pkg.Diff(builtResourceFile)
 		},
 	}
 

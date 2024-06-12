@@ -11,9 +11,8 @@ func main() {
 
 	rootCmd := cmd.NewRootCmd()
 
-	t := cmd.NewTemplateCmd()
-	
-	rootCmd.AddCommand(t)
+	rootCmd.AddCommand(cmd.NewTemplateCmd())
+	rootCmd.AddCommand(cmd.NewDiffCmd())
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
