@@ -10,3 +10,7 @@ mv helmfile /usr/local/bin
 wget 'https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.4.2/kustomize_v5.4.2_linux_amd64.tar.gz' -O kustomize.tar.gz
 tar -xvzf kustomize.tar.gz
 mv kustomize /usr/local/bin
+
+wget 'https://github.com/goreleaser/goreleaser/releases/download/v2.0.1/goreleaser_Linux_x86_64.tar.gz' -O goreleaser.tar.gz
+tar -xvzf goreleaser.tar.gz
+mv goreleaser /usr/local/bin

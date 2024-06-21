@@ -5,9 +5,11 @@ import (
 	"os"
 
 	"github.com/mlkmhd/hekura/cmd"
+	"github.com/mlkmhd/hekura/pkg"
 )
 
 func main() {
+	pkg.Logger.Info("starting app")
 
 	rootCmd := cmd.NewRootCmd()
 
