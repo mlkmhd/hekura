@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -20,15 +21,20 @@ func Build(config *Config) string {
 	for _, element := range config.Helmfile {
 		os.Chdir(element)
 
-		command := exec.Command("helmfile", "template", "-q")
+		cmd := exec.Command("helmfile", "template", "--debug")
 
-		// Capture output
-		output, err := command.CombinedOutput()
+		var stdout, stderr bytes.Buffer
+		cmd.Stdout = &stdout
+		cmd.Stderr = &stderr
+
+		err := cmd.Run()
+		outStr, errStr := stdout.String(), stderr.String()
 		if err != nil {
-			fmt.Println("Error executing command:", err)
+			fmt.Printf("Error executing helmfile command: %s\n", errStr)
 			os.Exit(1)
 		}
-		WriteToFile(tempDir+"/resources.yaml", string(output))
+
+		WriteToFile(tempDir+"/resources.yaml", outStr)
 		os.Chdir(rootDir)
 	}
 
@@ -45,7 +51,7 @@ func Build(config *Config) string {
 			command := exec.Command("kustomize", "build", ".")
 			output, err := command.CombinedOutput()
 			if err != nil {
-				fmt.Println("Error executing kustomize command:", err)
+				fmt.Println("Error executing kustomize command:", command, err)
 				os.Exit(1)
 			}
 
