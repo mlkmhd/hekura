@@ -1,11 +1,18 @@
 # Hekura (Helm + Kustomize + Raw manifests)
-A simple tool for combining Helmfile and Kustomize and Raw Manifests together to build highly customizable manifests
+Hekura is a simple tool that combines Helmfile, Kustomize, and Raw Manifests to build highly customizable manifests. It currently serves as a template engine over the Helmfile and Kustomize tools to combine them.
 
 ### Why Combine Tools?
-using a customized chart can lead to a disconnect from the original and hinder updates. When needing to include additional manifests but unable to modify the original chart, an algorithm integrating Helm charts, Kustomize, and raw manifest files is proposed to create a highly customizable set of manifests.
+Using a customized chart can lead to a disconnect from the original, making updates more challenging. When there is a need to include additional manifests but modifications to the original chart are not possible, an algorithm that integrates Helm charts, Kustomize, and raw manifest files is proposed. This approach allows for the creation of a highly customizable set of manifests.
 
-### Configuration
-The `hekura.yaml` configuration is like this:
+### Installation
+To install Hekura, follow these steps:
+- install `kubectl` from https://kubernetes.io/docs/tasks/tools/#kubectl 
+- install `helmfile` from https://github.com/helmfile/helmfile/releases
+- install `kustomize` from https://github.com/kubernetes-sigs/kustomize/releases 
+- install `hekura` from https://github.com/mlkmhd/hekura/releases 
+
+### Usage
+To use Hekura, you need to have a `hekura.yaml` configuration file structured as follows:
 ```commandline
 helmfile: 
   - sample-manifests/helmfile/
@@ -16,7 +23,7 @@ kustomize:
 raw-manifests:
   - sample-manifests/raw-manifests/
 ```
-your manifest files can be structured likes this:
+Your manifest files should be organized like this:
 ```commandline
 └── sample-manifests
     ├── helmfile
@@ -29,20 +36,18 @@ your manifest files can be structured likes this:
         └── network-policy.yaml
 ```
 
-The Hekura will start to generating and applying the manifests by the following order:
+Hekura will generate and apply the manifests in the following order:
 
-1- helmfiles
+1- Build the `helmfile`.
 
-2- kustomize
+2- Apply the `kustomize` path files to the manifests generated in the previous step.
 
-3- raw manifests
+3- Add `raw manifests` to the existing generated manifests.
 
-in the above configuration you can pass multiple helmfile and kustomize and raw-manifests directories.
-
-### Manifest Generation
-you can generate the manifests using the following command:
+You can generate and apply the manifests using the following command:
 ```commandline
-$ hekura template --config hekura.yaml
+$ hekura template --config hekura.yaml -o all.yaml
+$ kubectl apply -f all.yaml
 ```
 
 ### Read more
