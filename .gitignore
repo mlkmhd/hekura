@@ -1,0 +1,5 @@
+sample-manifests/resources.yaml
+hekura
+.idea
+dist
+.DS_Store

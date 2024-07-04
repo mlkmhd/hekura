@@ -1,0 +1,8 @@
+helmfile: 
+  - sample-manifests/helmfile/
+
+kustomize:
+  - sample-manifests/kustomize/
+
+raw-manifests:
+  - sample-manifests/raw-manifests/

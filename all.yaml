@@ -1,0 +1,178 @@
+# Warning: 'patchesStrategicMerge' is deprecated. Please use 'patches' instead. Run 'kustomize edit fix' to update your Kustomization automatically.
+apiVersion: v1
+data:
+  envoy.yaml: |-
+    ## refs:
+    ## - https://www.envoyproxy.io/docs/envoy/latest/start/start#quick-start-to-run-simple-example
+    ## - https://raw.githubusercontent.com/envoyproxy/envoy/master/configs/google_com_proxy.v2.yaml
+    admin:
+      access_log_path: /dev/stdout
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 9901
+
+    static_resources:
+      listeners:
+      - name: listener_0
+        address:
+          socket_address:
+            address: 0.0.0.0
+            port_value: 10000
+        filter_chains:
+        - filters:
+          - name: envoy.http_connection_manager
+            config:
+              access_log:
+              - name: envoy.file_access_log
+                config:
+                  path: /dev/stdout
+              stat_prefix: ingress_http
+              route_config:
+                name: local_route
+                virtual_hosts:
+                - name: local_service
+                  domains: ["*"]
+                  routes:
+                  - match:
+                      prefix: "/"
+                    route:
+                      host_rewrite: www.google.com
+                      cluster: service_google
+              http_filters:
+              - name: envoy.router
+      clusters:
+      - name: service_google
+        connect_timeout: 0.25s
+        type: LOGICAL_DNS
+        dns_lookup_family: V4_ONLY
+        lb_policy: ROUND_ROBIN
+        hosts:
+          - socket_address:
+              address: google.com
+              port_value: 443
+        tls_context:
+          sni: www.google.com
+kind: ConfigMap
+metadata:
+  labels:
+    app: envoy
+    chart: envoy-1.5.0
+    heritage: Helm
+    release: nginx-proxy
+  name: nginx-proxy-envoy
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: envoy
+    chart: envoy-1.5.0
+    heritage: Helm
+    release: nginx-proxy
+  name: envoy
+spec:
+  ports:
+  - name: n0
+    port: 10000
+    protocol: TCP
+    targetPort: n0
+  selector:
+    app: envoy
+    release: nginx-proxy
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: envoy
+    chart: envoy-1.5.0
+    heritage: Helm
+    release: nginx-proxy
+  name: nginx-proxy-envoy
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: envoy
+      release: nginx-proxy
+  strategy:
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        checksum/config: dcf55fe771e8dc66b5604bff7fb4e69d30255f028674662e15efda9c2a273efd
+      labels:
+        app: envoy
+        component: controller
+        release: nginx-proxy
+    spec:
+      containers:
+      - args:
+        - /usr/local/bin/envoy
+        - --v2-config-only
+        - -l
+        - $loglevel
+        - -c
+        - /config/envoy.yaml
+        command:
+        - /usr/bin/dumb-init
+        - --
+        env: null
+        image: envoyproxy/envoy-alpine:d920944aed67425f91fc203774aebce9609e5d9a
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          initialDelaySeconds: 30
+          tcpSocket:
+            port: admin
+        name: envoy
+        ports:
+        - containerPort: 9901
+          name: admin
+          protocol: TCP
+        - containerPort: 10000
+          name: n0
+          protocol: TCP
+        readinessProbe:
+          initialDelaySeconds: 30
+          tcpSocket:
+            port: admin
+        resources: {}
+        volumeMounts:
+        - mountPath: /config
+          name: config
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          name: nginx-proxy-envoy
+        name: config
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    env: beta
+  name: to-dev-beta
+  namespace: test
+spec:
+  egress:
+  - ports:
+    - port: 5672
+      protocol: TCP
+    to:
+    - ipBlock:
+        cidr: 192.168.1.1/32
+    - ipBlock:
+        cidr: 192.168.1.2/32
+  podSelector:
+    matchLabels:
+      env: beta
+      networkpolicy/to-dev: allow
+  policyTypes:
+  - Egress
