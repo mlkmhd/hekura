@@ -39,6 +39,7 @@ func Build(config *Config) string {
 	}
 
 	for _, element := range config.Kustomize {
+
 		if _, err := os.Stat(element); os.IsNotExist(err) {
 			fmt.Println("the kustomize patch files could not be found")
 		} else {

@@ -9,16 +9,7 @@ import (
 var Logger *logrus.Logger
 
 func init() {
-	// Initialize the logger
 	Logger = logrus.New()
-
-	// Set the logger to write logs to a file
-	//logFile, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	//if err == nil {
-	//    Logger.SetOutput(logFile)
-	//} else {
-	//    Logger.Info("Failed to log to file, using default stderr")
-	//}
 
 	Logger.SetOutput(os.Stdout)
 
@@ -43,5 +34,5 @@ func SetLogLevel(logLevel string) {
 	default:
 		Logger.Warn("Unknown log level specified, defaulting to 'info'")
 		Logger.SetLevel(logrus.InfoLevel)
-    }
+	}
 }
