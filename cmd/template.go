@@ -4,10 +4,16 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/mlkmhd/hekura/pkg"
 	"github.com/spf13/cobra"
+
+	"github.com/mlkmhd/hekura/pkg"
 )
 
+// NewTemplateCmd creates and returns the 'template' command.
+// The 'template' command generates Kubernetes manifests based on the Hekura configuration
+// and prints the resulting YAML to standard output.
+// It takes a '--config' or '-c' flag to specify the configuration file (defaults to 'hekura.yaml').
+// It also takes a '--loglevel' or '-l' flag to set the logging level.
 func NewTemplateCmd() *cobra.Command {
 	config := pkg.Config{}
 	var configFileName string
@@ -19,8 +25,11 @@ func NewTemplateCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			pkg.SetLogLevel(logLevel)
 			pkg.Logger.Debug("loading config files")
-			pkg.LoadConfig(configFileName, &config)
-			
+			if err := pkg.LoadConfig(configFileName, &config); err != nil {
+				fmt.Fprintf(os.Stderr, "Error loading config: %v\n", err)
+				os.Exit(1)
+			}
+
 			builtResourceFile, err := os.ReadFile(pkg.Build(&config))
 			if err != nil {
 				pkg.Logger.Fatalf("Error reading config file: %v; %v", configFileName, err)

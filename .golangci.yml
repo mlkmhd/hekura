@@ -1,0 +1,32 @@
+run:
+  deadline: 3m # 3 minutes timeout
+linters-settings:
+  govet:
+    check-shadowing: true # Re-enable this and remove 'shadow' from linters list
+  gofmt:
+    simplify: true
+  goimports:
+    local-prefixes: github.com/mlkmhd/hekura
+linters:
+  enable:
+    - govet
+    - errcheck
+    - staticcheck
+    - unused
+    - gosimple
+    # - structcheck # Deprecated
+    # - varcheck    # Deprecated
+    - ineffassign
+    # - deadcode    # Deprecated
+    - typecheck
+    # - golint      # Deprecated
+    - gofmt
+    - goimports
+  disable-all: false
+issues:
+  exclude-dirs:
+    - sample-manifests
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - funlen

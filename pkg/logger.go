@@ -2,10 +2,13 @@ package pkg
 
 import (
 	"os"
+	"strings" // Added import
 
 	"github.com/sirupsen/logrus"
 )
 
+// Logger is a global logrus.Logger instance used for logging throughout the pkg package.
+// It is initialized in the init function to output to os.Stdout with InfoLevel.
 var Logger *logrus.Logger
 
 func init() {
@@ -26,8 +29,14 @@ func init() {
 	Logger.SetLevel(logrus.InfoLevel)
 }
 
+// SetLogLevel sets the logging level for the global Logger.
+// It accepts a string representation of the log level (e.g., "debug", "info", "warn").
+// It converts the input level to lowercase for case-insensitive comparison.
+// If an unknown log level is provided, it defaults to "info" and logs a warning
+// using the original (case-preserved) logLevel string.
 func SetLogLevel(logLevel string) {
-	switch logLevel {
+	lowerLogLevel := strings.ToLower(logLevel)
+	switch lowerLogLevel {
 	case "debug":
 		Logger.SetLevel(logrus.DebugLevel)
 	case "info":
@@ -41,7 +50,7 @@ func SetLogLevel(logLevel string) {
 	case "panic":
 		Logger.SetLevel(logrus.PanicLevel)
 	default:
-		Logger.Warn("Unknown log level specified, defaulting to 'info'")
+		Logger.Warnf("Unknown log level specified ('%s'), defaulting to 'info'", logLevel)
 		Logger.SetLevel(logrus.InfoLevel)
-    }
+	}
 }
