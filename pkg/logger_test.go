@@ -68,7 +68,9 @@ func TestSetLogLevel_InvalidLevel(t *testing.T) {
 	testLogger := logrus.New()
 	var logCapture bytes.Buffer
 	testLogger.SetOutput(&logCapture)
-	testLogger.SetLevel(logrus.ErrorLevel) // Set a known level for testLogger
+	// Set level to WarnLevel or DebugLevel to ensure Warnf messages are captured.
+	// The function SetLogLevel will later change it to InfoLevel for the invalid case.
+	testLogger.SetLevel(logrus.WarnLevel) 
 
 	// Replace the global Logger with our testLogger
 	Logger = testLogger
